@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f7a8b8">
+<title>Mi Ciclo 💗</title>
+<style>
+  :root{
+    --rose:#e75480; --rose-deep:#c73e68; --rose-soft:#fdeef2; --peach:#fff7f5;
+    --ink:#4a2b36; --muted:#9a7a86; --card:#ffffff; --line:#f5dde3;
+    --green:#7fb069; --green-soft:#eef6ea; --gold:#d9a441; --gold-soft:#fdf6e7;
+    --radius:20px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:linear-gradient(180deg,#ffeef2 0%,#fff7f5 40%,#ffffff 100%);
+    color:var(--ink); min-height:100vh; padding-bottom:calc(90px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:480px;margin:0 auto;padding:16px 16px 0;}
+  header.top{text-align:center;padding:10px 0 4px;}
+  header.top h1{margin:0;font-size:26px;color:var(--rose-deep);letter-spacing:.5px;}
+  header.top p{margin:4px 0 0;color:var(--muted);font-size:14px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px;margin:12px 0;box-shadow:0 4px 14px rgba(231,84,128,.08);}
+  .status-hero{background:linear-gradient(135deg,#e75480,#f092ad);color:#fff;border:none;text-align:center;}
+  .status-hero .big{font-size:44px;font-weight:800;margin:6px 0;}
+  .status-hero .sub{font-size:14px;opacity:.95;}
+  .pill{display:inline-block;background:rgba(255,255,255,.25);border-radius:999px;
+    padding:4px 12px;font-size:12px;margin-top:8px;}
+  h2{font-size:17px;margin:0 0 10px;color:var(--rose-deep);}
+  h3{font-size:14px;margin:14px 0 8px;color:var(--ink);}
+  .row{display:flex;gap:8px;flex-wrap:wrap;}
+  .btn{border:none;border-radius:999px;padding:12px 18px;font-size:15px;font-weight:700;
+    cursor:pointer;flex:1;min-width:120px;}
+  .btn-primary{background:var(--rose);color:#fff;}
+  .btn-primary:active{background:var(--rose-deep);}
+  .btn-ghost{background:var(--rose-soft);color:var(--rose-deep);}
+  .chip{border:2px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;
+    font-size:14px;cursor:pointer;color:var(--ink);}
+  .chip.on{background:var(--rose);border-color:var(--rose);color:#fff;font-weight:700;}
+  .moods{display:flex;justify-content:space-between;gap:4px;}
+  .mood{font-size:32px;border:3px solid transparent;border-radius:16px;padding:6px;cursor:pointer;background:var(--peach);}
+  .mood.on{border-color:var(--rose);background:#fff;}
+  label.lbl{display:block;font-size:13px;color:var(--muted);margin:12px 0 4px;font-weight:600;}
+  select,input[type="time"],input[type="text"],textarea{
+    width:100%;border:2px solid var(--line);border-radius:12px;padding:10px 12px;
+    font-size:15px;color:var(--ink);background:#fff;font-family:inherit;}
+  textarea{resize:vertical;min-height:64px;}
+  /* Tabs */
+  nav.tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);
+    backdrop-filter:blur(10px);border-top:1px solid var(--line);
+    padding:8px 8px calc(8px + env(safe-area-inset-bottom));display:flex;z-index:50;}
+  nav.tabs button{flex:1;border:none;background:none;font-size:11px;color:var(--muted);
+    cursor:pointer;padding:6px 0;border-radius:12px;}
+  nav.tabs button .ic{font-size:22px;display:block;}
+  nav.tabs button.on{color:var(--rose-deep);font-weight:700;}
+  .view{display:none;} .view.on{display:block;}
+  /* Calendar */
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .cal-head b{font-size:16px;color:var(--rose-deep);text-transform:capitalize;}
+  .cal-nav{border:none;background:var(--rose-soft);color:var(--rose-deep);border-radius:50%;
+    width:36px;height:36px;font-size:18px;cursor:pointer;}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .dow{text-align:center;font-size:11px;color:var(--muted);font-weight:700;padding:4px 0;}
+  .day{aspect-ratio:1;border-radius:12px;border:1px solid transparent;background:transparent;
+    font-size:14px;color:var(--ink);cursor:pointer;position:relative;}
+  .day.dim{color:#d8bcc4;}
+  .day.period{background:var(--rose);color:#fff;font-weight:700;}
+  .day.predicted{border:2px dashed var(--rose);background:var(--rose-soft);}
+  .day.fertile{background:var(--green-soft);}
+  .day.today{box-shadow:0 0 0 2px var(--rose-deep) inset;}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px;}
+  .legend span{display:flex;align-items:center;gap:5px;}
+  .dot{width:12px;height:12px;border-radius:50%;display:inline-block;}
+  /* Stats */
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .stat{background:var(--peach);border-radius:14px;padding:12px;text-align:center;}
+  .stat .v{font-size:22px;font-weight:800;color:var(--rose-deep);}
+  .stat .k{font-size:12px;color:var(--muted);}
+  .cycle-row{display:flex;justify-content:space-between;align-items:center;
+    padding:10px 4px;border-bottom:1px solid var(--line);font-size:14px;}
+  .cycle-row:last-child{border-bottom:none;}
+  .badge{font-size:11px;font-weight:700;border-radius:999px;padding:3px 10px;}
+  .b-alta{background:#dff0d8;color:#3c763d;} .b-media{background:#fcf8e3;color:#8a6d3b;} .b-baja{background:#f2dede;color:#a94442;}
+  .note{font-size:12px;color:var(--muted);line-height:1.5;}
+  .conf-box{border-radius:14px;padding:12px;font-size:13px;line-height:1.5;margin-top:10px;}
+  /* Welcome overlay */
+  #welcome{position:fixed;inset:0;background:rgba(74,43,54,.45);z-index:100;
+    display:flex;align-items:flex-end;justify-content:center;}
+  #welcome .sheet{background:#fff;border-radius:24px 24px 0 0;max-width:480px;width:100%;
+    padding:24px 20px calc(24px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto;}
+  #welcome h2{font-size:22px;text-align:center;}
+  #welcome ul{padding-left:20px;font-size:14px;line-height:1.7;color:var(--ink);}
+  .hidden{display:none!important;}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom));
+    background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;
+    opacity:0;transition:opacity .3s;z-index:200;pointer-events:none;}
+  .toast.show{opacity:1;}
+  .sleep-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .phase-bar{display:flex;border-radius:12px;overflow:hidden;margin:8px 0;font-size:10px;
+    text-align:center;color:#fff;font-weight:700;}
+  .phase-bar div{padding:6px 2px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Mi Ciclo 💗</h1>
+    <p id="hello">para ti 💗</p>
+  </header>
+
+  <!-- HOY -->
+  <section id="v-hoy" class="view on">
+    <div class="card status-hero" id="hero"></div>
+
+    <div class="card">
+      <h2>¿Te llegó hoy? 🩸</h2>
+      <div class="row">
+        <button class="btn btn-primary" id="btnLlego">Sí, me llegó hoy</button>
+        <button class="btn btn-ghost" id="btnNoLlego">No / ya pasó</button>
+      </div>
+      <div id="flowBox" class="hidden">
+        <label class="lbl">¿Cómo es el flujo?</label>
+        <div class="row" id="flowChips">
+          <button class="chip" data-v="ligero">💧 Ligero</button>
+          <button class="chip" data-v="medio">💧💧 Medio</button>
+          <button class="chip" data-v="abundante">💧💧💧 Abundante</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>¿Cómo te sientes hoy? 💭</h2>
+      <label class="lbl">Estado de ánimo</label>
+      <div class="moods" id="moodRow">
+        <button class="mood" data-v="1">😭</button>
+        <button class="mood" data-v="2">😟</button>
+        <button class="mood" data-v="3">😐</button>
+        <button class="mood" data-v="4">🙂</button>
+        <button class="mood" data-v="5">😄</button>
+      </div>
+      <label class="lbl">Síntomas</label>
+      <div class="row" id="symRow">
+        <button class="chip" data-v="colicos">Cólicos</button>
+        <button class="chip" data-v="cabeza">Dolor de cabeza</button>
+        <button class="chip" data-v="hinchazon">Hinchazón</button>
+        <button class="chip" data-v="antojos">Antojos</button>
+        <button class="chip" data-v="cansancio">Cansancio</button>
+        <button class="chip" data-v="senos">Sensibilidad</button>
+        <button class="chip" data-v="acne">Acné</button>
+        <button class="chip" data-v="nauseas">Náuseas</button>
+        <button class="chip" data-v="espalda">Dolor de espalda</button>
+        <button class="chip" data-v="insomnio">Insomnio</button>
+      </div>
+      <label class="lbl">Nota del día</label>
+      <textarea id="dayNote" placeholder="Escribe lo que quieras recordar…"></textarea>
+    </div>
+
+    <div class="card">
+      <h2>Tu sueño 😴</h2>
+      <div class="sleep-row">
+        <div><label class="lbl">Me acosté</label><input type="time" id="sleepBed" value="23:00"></div>
+        <div><label class="lbl">Me levanté</label><input type="time" id="sleepWake" value="09:30"></div>
+      </div>
+      <p class="note" id="sleepInfo" style="margin-top:8px"></p>
+      <div class="row" style="margin-top:10px">
+        <button class="btn btn-primary" id="btnSaveDay">Guardar día 💗</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Tu predicción 🔮</h2>
+      <div id="predBox"></div>
+    </div>
+  </section>
+
+  <!-- CALENDARIO -->
+  <section id="v-cal" class="view">
+    <div class="card">
+      <div class="cal-head">
+        <button class="cal-nav" id="calPrev">‹</button>
+        <b id="calTitle"></b>
+        <button class="cal-nav" id="calNext">›</button>
+      </div>
+      <div class="grid" id="calGrid"></div>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--rose)"></i> Período</span>
+        <span><i class="dot" style="border:2px dashed var(--rose);background:var(--rose-soft)"></i> Ventana estimada</span>
+        <span><i class="dot" style="background:var(--green-soft);border:1px solid var(--green)"></i> Días fértiles (estim.)</span>
+      </div>
+      <p class="note" style="margin-top:10px">Toca un día para marcar o desmarcar tu período. Todo se recalcula solo 💗</p>
+    </div>
+  </section>
+
+  <!-- HISTORIAL -->
+  <section id="v-hist" class="view">
+    <div class="card">
+      <h2>Tus estadísticas 📊</h2>
+      <div class="stat-grid" id="statGrid"></div>
+    </div>
+    <div class="card">
+      <h2>Tus ciclos 🔄</h2>
+      <div id="cycleList"></div>
+      <p class="note">Un ciclo se cuenta desde el primer día de un período hasta el día antes del siguiente.</p>
+    </div>
+  </section>
+
+  <!-- MÁS -->
+  <section id="v-mas" class="view">
+    <div class="card">
+      <h2>Respaldo 💾</h2>
+      <p class="note">Tus datos viven <b>solo en este teléfono</b>. Nadie más puede verlos. Haz un respaldo por si cambias de teléfono:</p>
+      <div class="row" style="margin-top:10px">
+        <button class="btn btn-ghost" id="btnExport">Exportar respaldo</button>
+        <button class="btn btn-ghost" id="btnImport">Importar respaldo</button>
+        <input type="file" id="fileImport" accept=".json" class="hidden">
+      </div>
+    </div>
+    <div class="card">
+      <h2>Tu nombre ✨</h2>
+      <input type="text" id="nameInput" placeholder="¿Cómo te llamas?" maxlength="30">
+      <div class="row" style="margin-top:10px"><button class="btn btn-ghost" id="btnName">Guardar</button></div>
+    </div>
+    <div class="card">
+      <h2>Privacidad 🔒</h2>
+      <p class="note">Esta app no tiene cuentas, no usa internet y no envía nada a ningún servidor. Todo lo que registres se queda en tu teléfono. Si borras los datos del navegador, usa tu respaldo para recuperarlos.</p>
+    </div>
+    <div class="card">
+      <h2>Importante ⚠️</h2>
+      <p class="note">Esto no es consejo médico. Las predicciones son estimados — con ciclos irregulares ninguna app puede dar fechas exactas. Si tus ciclos cambian mucho o te preocupan, habla con un médico. 💗</p>
+    </div>
+    <div class="card">
+      <h2>Borrar todo 🗑️</h2>
+      <div class="row"><button class="btn btn-ghost" id="btnWipe" style="color:#a94442">Borrar todos mis datos</button></div>
+    </div>
+  </section>
+</div>
+
+<nav class="tabs">
+  <button data-v="v-hoy" class="on"><span class="ic">💗</span>Hoy</button>
+  <button data-v="v-cal"><span class="ic">📅</span>Calendario</button>
+  <button data-v="v-hist"><span class="ic">📊</span>Historial</button>
+  <button data-v="v-mas"><span class="ic">⚙️</span>Más</button>
+</nav>
+
+<div id="welcome">
+  <div class="sheet">
+    <h2>¡Hola! 💗</h2>
+    <p style="text-align:center;color:var(--muted);font-size:14px">Esta es tu app personal para conocer tu ciclo.</p>
+    <ul>
+      <li>🩸 Marca tus días de período tocando el calendario</li>
+      <li>🔮 Te muestra una <b>ventana estimada</b> de tu próximo período (con ciclos irregulares nadie puede dar fechas exactas)</li>
+      <li>💭 Registra tu ánimo, síntomas y sueño cada día</li>
+      <li>🔒 Todo se guarda <b>solo en tu teléfono</b>, sin cuentas ni internet</li>
+    </ul>
+    <p style="font-size:13px;color:var(--muted)">Marca tus días de período tocando el calendario y todo se calcula solo.</p>
+    <button class="btn btn-primary" id="btnWelcome" style="width:100%">Empezar 💗</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ---------- utilidades de fecha (hora local, sin desfases) ---------- */
+function dISO(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function pISO(s){var a=s.split("-");return new Date(+a[0],+a[1]-1,+a[2]);}
+function addD(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x;}
+function diffD(a,b){return Math.round((b-a)/86400000);}
+function todayISO(){return dISO(new Date());}
+function fmtLong(iso){var d=pISO(iso);return d.toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"});}
+function fmtShort(iso){var d=pISO(iso);return d.toLocaleDateString("es-ES",{day:"numeric",month:"short"});}
+
+/* ---------- datos ---------- */
+var KEY="miciclo_v1";
+var SEED_PERIOD=[];
+function blank(){return {periodDays:[],logs:{},name:"",welcomed:false};}
+function load(){
+  try{var raw=localStorage.getItem(KEY);if(raw){var d=JSON.parse(raw);if(d&&d.periodDays)return d;}}catch(e){}
+  var d=blank();SEED_PERIOD.forEach(function(r){r.forEach(function(x){d.periodDays.push(x);});});
+  return d;
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){}}
+var DB=load();
+
+/* ---------- análisis del ciclo ---------- */
+function periodStarts(){
+  var s=DB.periodDays.slice().sort();var starts=[];var prev=null;
+  s.forEach(function(iso){
+    if(prev===null||diffD(pISO(prev),pISO(iso))>2)starts.push(iso);
+    prev=iso;
+  });
+  return starts;
+}
+function cycleLengths(){
+  var st=periodStarts();var L=[];
+  for(var i=1;i<st.length;i++)L.push(diffD(pISO(st[i-1]),pISO(st[i])));
+  return L;
+}
+function stats(){
+  var L=cycleLengths();if(!L.length)return null;
+  // promedio ponderado: el ciclo más reciente pesa más (0.5 / 0.3 / 0.2)
+  var w=L.slice(-3),ws=[0.2,0.3,0.5],num=0,den=0;
+  var use=ws.slice(ws.length-w.length);
+  for(var i=0;i<w.length;i++){num+=w[i]*use[i];den+=use[i];}
+  var avg=num/den;
+  var mean=L.reduce(function(a,b){return a+b;},0)/L.length;
+  var sd=Math.sqrt(L.reduce(function(a,b){return a+Math.pow(b-mean,2);},0)/L.length);
+  var per=DB.periodDays.length/Math.max(1,periodStarts().length);
+  return {lengths:L,avg:avg,sd:sd,min:Math.min.apply(null,L),max:Math.max.apply(null,L),avgPeriod:per,n:L.length+1};
+}
+function prediction(){
+  var st=periodStarts();if(!st.length)return null;
+  var s=stats();var last=pISO(st[st.length-1]);
+  var cyc=s?Math.round(s.avg):28;
+  var pred=addD(last,cyc);
+  var half=s?Math.max(2,Math.round(s.sd)):3;
+  var conf=!s?"media":(s.sd<=3?"alta":(s.sd<=7?"media":"baja"));
+  var ovu=addD(pred,-14);
+  return {
+    start:dISO(pred),winA:dISO(addD(pred,-half)),winB:dISO(addD(pred,half)),
+    conf:conf,cyc:cyc,half:half,
+    ovu:dISO(ovu),fertA:dISO(addD(ovu,-5)),fertB:dISO(addD(ovu,1)),
+    pmsA:dISO(addD(pred,-7)),pmsB:dISO(addD(pred,-1)),
+    lastStart:st[st.length-1],dayNum:diffD(last,new Date())+1
+  };
+}
+function phaseOn(iso){
+  var st=periodStarts();if(!st.length)return null;
+  var d=pISO(iso),last=null;
+  st.forEach(function(s){if(pISO(s)<=d)last=pISO(s);});
+  if(!last)return null;
+  var day=diffD(last,d)+1;
+  var s=stats();var cyc=s?Math.round(s.avg):28;
+  var inP=DB.periodDays.indexOf(iso)>=0;
+  if(inP||day<=5)return {k:"menstrual",n:"Menstrual 🩸",day:day,c:"#e75480"};
+  var ovu=cyc-14;
+  if(day>=ovu-2&&day<=ovu+1)return {k:"ovulacion",n:"Ovulación estimada 🌸",day:day,c:"#7fb069"};
+  if(day<ovu-2)return {k:"folicular",n:"Folicular 🌱",day:day,c:"#d9a441"};
+  return {k:"lutea",n:"Lútea 🌙",day:day,c:"#8e7cc3"};
+}
+
+/* ---------- UI helpers ---------- */
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.classList.add("show");
+  setTimeout(function(){t.classList.remove("show");},2200);}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+
+/* ---------- HERO + predicción ---------- */
+function renderHero(){
+  var p=prediction(),h=document.getElementById("hero");
+  if(!p){h.innerHTML='<div class="sub">Marca tu primer período en el calendario</div>';return;}
+  var t=todayISO(),msg,cls="";
+  if(t<p.winA){var n=diffD(pISO(t),pISO(p.winA));msg='<div class="big">'+n+'</div><div class="sub">'+(n===1?"falta 1 día":"faltan "+n+" días")+' para tu ventana estimada</div>';}
+  else if(t<=p.winB){msg='<div class="big">💗</div><div class="sub">Estás en tu <b>ventana estimada</b><br>('+fmtShort(p.winA)+" – "+fmtShort(p.winB)+')</div>';}
+  else{var n=diffD(pISO(p.winB),pISO(t));msg='<div class="big">'+n+'</div><div class="sub">días desde tu ventana estimada<br>márcalo cuando llegue 🩸</div>';}
+  var ph=phaseOn(t);
+  h.innerHTML=msg+'<div class="pill">Día '+p.dayNum+' del ciclo · '+(ph?ph.n:"")+'</div>';
+}
+function renderPred(){
+  var p=prediction(),b=document.getElementById("predBox");
+  if(!p){b.innerHTML='<p class="note">Necesito al menos un período registrado.</p>';return;}
+  var confTxt={alta:["Alta","b-alta","Tus ciclos son bastante regulares."],media:["Media","b-media","Hay algo de variación, tómalo como guía."],baja:["Baja","b-baja","Tus ciclos varían mucho: es solo un estimado amplio."]}[p.conf];
+  b.innerHTML=
+   '<div class="stat-grid">'+
+   '<div class="stat"><div class="v">'+fmtShort(p.winA)+'</div><div class="k">ventana desde</div></div>'+
+   '<div class="stat"><div class="v">'+fmtShort(p.winB)+'</div><div class="k">ventana hasta</div></div></div>'+
+   '<div class="conf-box" style="background:var(--gold-soft)">Confianza: <span class="badge '+confTxt[1]+'">'+confTxt[0]+'</span><br>'+confTxt[2]+'</div>'+
+   '<h3>Fases estimadas de este ciclo</h3><div class="phase-bar">'+
+   '<div style="flex:5;background:#e75480">Menstrual</div>'+
+   '<div style="flex:'+Math.max(1,(p.cyc-14)-5)+';background:#d9a441">Folicular</div>'+
+   '<div style="flex:3;background:#7fb069">Ovul.</div>'+
+   '<div style="flex:9;background:#8e7cc3">Lútea</div></div>'+
+   '<p class="note">🌸 Días fértiles estimados: '+fmtShort(p.fertA)+" – "+fmtShort(p.fertB)+'<br>🌙 Posible SPM: '+fmtShort(p.pmsA)+" – "+fmtShort(p.pmsB)+'</p>';
+}
+
+/* ---------- registro del día ---------- */
+var daySel={mood:null,syms:[],flow:null,period:false};
+function bindChips(id,fn){var el=document.getElementById(id);
+  el.querySelectorAll(".chip,.mood").forEach(function(c){c.addEventListener("click",function(){fn(c);});});}
+function loadToday(){
+  var t=todayISO(),lg=DB.logs[t]||{};
+  daySel={mood:lg.mood||null,syms:(lg.symptoms||[]).slice(),flow:lg.flow||null,
+    period:DB.periodDays.indexOf(t)>=0};
+  paintSel();
+  document.getElementById("dayNote").value=lg.note||"";
+  document.getElementById("sleepBed").value=lg.sleepBed||"23:00";
+  document.getElementById("sleepWake").value=lg.sleepWake||"09:30";
+  updateSleepInfo();
+}
+function paintSel(){
+  document.querySelectorAll("#moodRow .mood").forEach(function(m){m.classList.toggle("on",+m.dataset.v===daySel.mood);});
+  document.querySelectorAll("#symRow .chip").forEach(function(c){c.classList.toggle("on",daySel.syms.indexOf(c.dataset.v)>=0);});
+  document.querySelectorAll("#flowChips .chip").forEach(function(c){c.classList.toggle("on",c.dataset.v===daySel.flow);});
+  document.getElementById("flowBox").classList.toggle("hidden",!daySel.period);
+}
+function updateSleepInfo(){
+  var b=document.getElementById("sleepBed").value,w=document.getElementById("sleepWake").value;
+  if(!b||!w){document.getElementById("sleepInfo").textContent="";return;}
+  var bh=+b.split(":")[0]+(+b.split(":")[1])/60,wh=+w.split(":")[0]+(+w.split(":")[1])/60;
+  var h=wh-bh;if(h<=0)h+=24;
+  document.getElementById("sleepInfo").textContent="😴 Dormirías unas "+h.toFixed(1).replace(".",",")+" horas.";
+}
+function saveDay(){
+  var t=todayISO();
+  var i=DB.periodDays.indexOf(t);
+  if(daySel.period&&i<0)DB.periodDays.push(t);
+  if(!daySel.period&&i>=0)DB.periodDays.splice(i,1);
+  DB.logs[t]={mood:daySel.mood,symptoms:daySel.syms,flow:daySel.period?daySel.flow:null,
+    sleepBed:document.getElementById("sleepBed").value,sleepWake:document.getElementById("sleepWake").value,
+    note:document.getElementById("dayNote").value.trim()};
+  save();renderAll();toast("Guardado 💗");
+}
+
+/* ---------- calendario ---------- */
+var calCursor=new Date();calCursor.setDate(1);
+function renderCal(){
+  var y=calCursor.getFullYear(),m=calCursor.getMonth();
+  document.getElementById("calTitle").textContent=new Date(y,m,1).toLocaleDateString("es-ES",{month:"long",year:"numeric"});
+  var g=document.getElementById("calGrid");g.innerHTML="";
+  ["L","M","X","J","V","S","D"].forEach(function(d){var e=document.createElement("div");e.className="dow";e.textContent=d;g.appendChild(e);});
+  var first=(new Date(y,m,1).getDay()+6)%7,days=new Date(y,m+1,0).getDate();
+  var p=prediction(),t=todayISO();
+  for(var i=0;i<first;i++){var e=document.createElement("div");e.className="day dim";g.appendChild(e);}
+  for(var dnum=1;dnum<=days;dnum++){
+    (function(dnum){
+      var dt=new Date(y,m,dnum),iso=dISO(dt);
+      var b=document.createElement("button");b.className="day";b.textContent=dnum;
+      if(iso===t)b.classList.add("today");
+      if(DB.periodDays.indexOf(iso)>=0)b.classList.add("period");
+      else if(p&&iso>=p.winA&&iso<=p.winB)b.classList.add("predicted");
+      else if(p&&iso>=p.fertA&&iso<=p.fertB)b.classList.add("fertile");
+      b.addEventListener("click",function(){
+        var i=DB.periodDays.indexOf(iso);
+        if(i>=0)DB.periodDays.splice(i,1);else DB.periodDays.push(iso);
+        save();renderAll();
+        toast(i>=0?"Día desmarcado":"Marcado como período 🩸");
+      });
+      g.appendChild(b);
+    })(dnum);
+  }
+}
+
+/* ---------- historial ---------- */
+function renderHist(){
+  var s=stats(),sg=document.getElementById("statGrid");
+  if(!s){sg.innerHTML='<div class="stat"><div class="v">–</div><div class="k">registra más</div></div>';}
+  else{
+    sg.innerHTML=
+    '<div class="stat"><div class="v">'+Math.round(s.avg)+'</div><div class="k">días ciclo prom.</div></div>'+
+    '<div class="stat"><div class="v">'+s.min+"–"+s.max+'</div><div class="k">rango (días)</div></div>'+
+    '<div class="stat"><div class="v">'+s.avgPeriod.toFixed(1).replace(".",",")+'</div><div class="k">días dura prom.</div></div>'+
+    '<div class="stat"><div class="v">'+s.n+'</div><div class="k">períodos</div></div>';
+  }
+  var st=periodStarts(),cl=document.getElementById("cycleList");cl.innerHTML="";
+  if(st.length<2){cl.innerHTML='<p class="note">Cuando registres más períodos verás tus ciclos aquí.</p>';return;}
+  for(var i=st.length-1;i>=1;i--){
+    var len=diffD(pISO(st[i-1]),pISO(st[i]));
+    var r=document.createElement("div");r.className="cycle-row";
+    r.innerHTML="<span>"+fmtShort(st[i-1])+" → "+fmtShort(st[i])+"</span><b>"+len+" días</b>";
+    cl.appendChild(r);
+  }
+}
+
+/* ---------- tabs ---------- */
+document.querySelectorAll("nav.tabs button").forEach(function(b){
+  b.addEventListener("click",function(){
+    document.querySelectorAll("nav.tabs button").forEach(function(x){x.classList.remove("on");});
+    b.classList.add("on");
+    document.querySelectorAll(".view").forEach(function(v){v.classList.remove("on");});
+    document.getElementById(b.dataset.v).classList.add("on");
+    window.scrollTo(0,0);
+  });
+});
+
+/* ---------- eventos ---------- */
+document.getElementById("btnLlego").addEventListener("click",function(){daySel.period=true;paintSel();});
+document.getElementById("btnNoLlego").addEventListener("click",function(){daySel.period=false;daySel.flow=null;paintSel();});
+bindChips("flowChips",function(c){daySel.flow=c.dataset.v;paintSel();});
+bindChips("moodRow",function(c){daySel.mood=+c.dataset.v;paintSel();});
+bindChips("symRow",function(c){var v=c.dataset.v,i=daySel.syms.indexOf(v);
+  if(i>=0)daySel.syms.splice(i,1);else daySel.syms.push(v);paintSel();});
+document.getElementById("btnSaveDay").addEventListener("click",saveDay);
+["sleepBed","sleepWake"].forEach(function(id){document.getElementById(id).addEventListener("change",updateSleepInfo);});
+document.getElementById("calPrev").addEventListener("click",function(){calCursor.setMonth(calCursor.getMonth()-1);renderCal();});
+document.getElementById("calNext").addEventListener("click",function(){calCursor.setMonth(calCursor.getMonth()+1);renderCal();});
+document.getElementById("btnWelcome").addEventListener("click",function(){
+  DB.welcomed=true;save();document.getElementById("welcome").classList.add("hidden");});
+document.getElementById("btnName").addEventListener("click",function(){
+  var n=document.getElementById("nameInput").value.trim();if(n){DB.name=n;save();
+    document.getElementById("hello").textContent="para "+n;toast("¡Hola, "+n+"! 💗");}});
+document.getElementById("btnExport").addEventListener("click",function(){
+  var blob=new Blob([JSON.stringify(DB,null,2)],{type:"application/json"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="mi-ciclo-respaldo.json";a.click();toast("Respaldo descargado 💾");});
+document.getElementById("btnImport").addEventListener("click",function(){document.getElementById("fileImport").click();});
+document.getElementById("fileImport").addEventListener("change",function(e){
+  var f=e.target.files[0];if(!f)return;var r=new FileReader();
+  r.onload=function(){try{var d=JSON.parse(r.result);
+    if(d&&d.periodDays){DB=d;save();renderAll();toast("Respaldo importado 💗");}
+    else toast("Archivo no válido");}catch(err){toast("Archivo no válido");}};
+  r.readAsText(f);});
+document.getElementById("btnWipe").addEventListener("click",function(){
+  if(confirm("¿Borrar TODOS tus datos? No se puede deshacer.")){
+    DB=blank();DB.welcomed=true;save();renderAll();toast("Datos borrados");}});
+
+/* ---------- init ---------- */
+function renderAll(){renderHero();renderPred();renderCal();renderHist();loadToday();
+  document.getElementById("hello").textContent="para "+(DB.name||"ti");
+  document.getElementById("nameInput").value=DB.name||"";}
+if(DB.welcomed)document.getElementById("welcome").classList.add("hidden");
+renderAll();
+</script>
+</body>
+</html>
