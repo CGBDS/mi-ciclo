@@ -312,12 +312,12 @@ function stats(){
   return {lengths:L,avg:avg,sd:sd,min:Math.min.apply(null,L),max:Math.max.apply(null,L),avgPeriod:per,n:L.length+1};
 }
 function prediction(){
-  var st=periodStarts();if(!st.length)return null;
+  var st=periodStarts();if(st.length<2)return null;
   var s=stats();var last=pISO(st[st.length-1]);
-  var cyc=s?Math.round(s.avg):28;
+  var cyc=Math.round(s.avg);
   var pred=addD(last,cyc);
-  var half=s?Math.max(2,Math.round(s.sd)):3;
-  var conf=!s?"media":(s.sd<=3?"alta":(s.sd<=7?"media":"baja"));
+  var half=s.lengths.length===1?7:Math.max(2,Math.round(s.sd));
+  var conf=s.lengths.length===1?"baja":(s.sd<=3?"alta":(s.sd<=7?"media":"baja"));
   var ovu=addD(pred,-14);
   return {
     start:dISO(pred),winA:dISO(addD(pred,-half)),winB:dISO(addD(pred,half)),
@@ -350,7 +350,8 @@ function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
 /* ---------- HERO + predicción ---------- */
 function renderHero(){
   var p=prediction(),h=document.getElementById("hero");
-  if(!p){h.innerHTML='<div class="sub">Marca tu primer período en el calendario</div>';return;}
+  if(!p){var n0=periodStarts().length;
+    h.innerHTML='<div class="sub">'+(n0===0?'Marca tus días de período en el calendario 📅':'¡Bien! Cuando te llegue el próximo período, márcalo y activo tu predicción 🔮')+'</div>';return;}
   var t=todayISO(),msg,cls="";
   if(t<p.winA){var n=diffD(pISO(t),pISO(p.winA));msg='<div class="big">'+n+'</div><div class="sub">'+(n===1?"falta 1 día":"faltan "+n+" días")+' para tu ventana estimada</div>';}
   else if(t<=p.winB){msg='<div class="big">💗</div><div class="sub">Estás en tu <b>ventana estimada</b><br>('+fmtShort(p.winA)+" – "+fmtShort(p.winB)+')</div>';}
@@ -360,13 +361,14 @@ function renderHero(){
 }
 function renderPred(){
   var p=prediction(),b=document.getElementById("predBox");
-  if(!p){b.innerHTML='<p class="note">Necesito al menos un período registrado.</p>';return;}
+  if(!p){var n1=periodStarts().length;
+    b.innerHTML='<p class="note">'+(n1===0?'Marca tus períodos en el calendario para empezar. 💗':'Con un solo período aún no puedo predecir — cuando registres el próximo, calculo tu ventana estimada. 💗')+'</p>';return;}
   var confTxt={alta:["Alta","b-alta","Tus ciclos son bastante regulares."],media:["Media","b-media","Hay algo de variación, tómalo como guía."],baja:["Baja","b-baja","Tus ciclos varían mucho: es solo un estimado amplio."]}[p.conf];
   b.innerHTML=
    '<div class="stat-grid">'+
    '<div class="stat"><div class="v">'+fmtShort(p.winA)+'</div><div class="k">ventana desde</div></div>'+
    '<div class="stat"><div class="v">'+fmtShort(p.winB)+'</div><div class="k">ventana hasta</div></div></div>'+
-   '<div class="conf-box" style="background:var(--gold-soft)">Confianza: <span class="badge '+confTxt[1]+'">'+confTxt[0]+'</span><br>'+confTxt[2]+'</div>'+
+   '<div class="conf-box" style="background:var(--gold-soft)">Confianza: <span class="badge '+confTxt[1]+'">'+confTxt[0]+'</span><br>'+confTxt[2]+(stats().lengths.length===1?'<br>Solo tienes 1 ciclo registrado: la ventana es amplia a propósito.':'')+'</div>'+
    '<h3>Fases estimadas de este ciclo</h3><div class="phase-bar">'+
    '<div style="flex:5;background:#e75480">Menstrual</div>'+
    '<div style="flex:'+Math.max(1,(p.cyc-14)-5)+';background:#d9a441">Folicular</div>'+
